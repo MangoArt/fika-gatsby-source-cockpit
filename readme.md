@@ -1,3 +1,14 @@
+This is a fork of @fika/gatsby-source-cockpit created to support some older Cockpit Features (e.g. Regions) and some custom AddOns created by MangoART for Cockpit.
+
+In most cases you should probably prefer to use the @fika release as it might be better supported but if you are interested in one of the changes listed below feel free to try your luck.
+
+Changes from @fika/gatsby-source:
+ - Support for Cockpit Regions (relying on some API changes to the Region module so that it also delivers data schema)
+ - Support for Cockpit Pages (custom Cockpit Extension created by MangoART - basically a Rebranded Region module to give customers an easy to understand "Pages" section)
+ - Removal of the unnecessary "type" & "value" nodes for each property (WIP)
+
+Original release notes of @fika/gatsby-source-cockpit below.
+
 # @fika/gatsby-source-cockpit
 
 This is a Gatsby version 2.\*.\* source plugin that feeds the GraphQL tree with Cockpit Headless CMS data.

@@ -1,7 +1,7 @@
 {
-  "name": "@fika/gatsby-source-cockpit",
-  "version": "1.0.10",
-  "description": "This is a Gatsby version 2.x.x source plugin that feeds the GraphQL tree with Cockpit Headless CMS data. Actually, it supports querying raw texts (and any trivial field types), Markdown, images, gallery, assets, linked collections and internationalization.",
+  "name": "@mangoart/gatsby-source-cockpit",
+  "version": "1.0.1",
+  "description": "This is a for of @fika/gatsby-source-cockpit and you should probably use their implementation. This is a Gatsby version 2.x.x source plugin that feeds the GraphQL tree with Cockpit Headless CMS data. Actually, it supports querying raw texts (and any trivial field types), Markdown, images, gallery, assets, linked collections and internationalization.",
   "main": "gatsby-node.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,19 +12,18 @@
     "gatsby-source-plugin",
     "cockpit",
     "headless-cms",
-    "fika",
     "productions"
   ],
-  "author": "Fika Productions <info@fikaproductions.com>",
+  "author": "Markus Oehler <m.oehler@digital-city.solutions>",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fikaproductions/fika-gatsby-source-cockpit.git"
+    "url": "https://github.com/mangoart/gatsby-source-cockpit.git"
   },
   "bugs": {
-    "url": "https://github.com/fikaproductions/fika-gatsby-source-cockpit/issues"
+    "url": "https://github.com/mangoart/gatsby-source-cockpit/issues"
   },
-  "homepage": "https://github.com/fikaproductions/fika-gatsby-source-cockpit",
+  "homepage": "https://github.com/mangoart/gatsby-source-cockpit",
   "dependencies": {
     "gatsby-node-helpers": "^0.3.0",
     "gatsby-source-filesystem": "^2.0.5",
