@@ -117,8 +117,46 @@ module.exports = class CockpitService {
     );
   }
 
-  normalizeCollectionsImages(collections) {
-    const images = {};
+  async getPageNames() {
+    return this.fetch("/pages/listPages", METHODS.GET);
+  }
+
+  async getPage(name) {
+    const { fields: pageFields, entries } = await this.fetch(
+      `/pages/get/${name}`,
+      METHODS.GET
+    );
+
+    const items = entries.map(entry =>
+      createCollectionItem(pageFields, entry)
+    );
+
+    for (let index = 0; index < this.locales.length; index++) {
+      const { fields: pageFields, entries } = await this.fetch(
+        `/pages/get/${name}`,
+        METHODS.GET,
+        this.locales[index]
+      );
+
+      items.push(
+        ...entries.map(entry =>
+          createCollectionItem(pageFields, entry, this.locales[index])
+        )
+      );
+    }
+
+    return {items, name};
+  }
+
+  async getPages() {
+    const names = await this.getPageNames();
+    return Promise.all(
+      names.map(name => this.getPage(name))
+    );
+  }
+
+
+  normalizeCollectionsImages(collections, existingImages = {}) {
 
     collections.forEach(collection => {
       collection.items.forEach(item => {
@@ -146,7 +184,7 @@ module.exports = class CockpitService {
               }
 
               imageField.value = path;
-              images[path] = null;
+              existingImages[path] = null;
             } else {
               const galleryField = item[fieldName];
 
@@ -166,18 +204,17 @@ module.exports = class CockpitService {
                 }
 
                 galleryImageField.value = path;
-                images[path] = null;
+                existingImages[path] = null;
               });
             }
           });
       });
     });
 
-    return images;
+    return existingImages;
   }
 
-  normalizeCollectionsAssets(collections) {
-    const assets = {};
+  normalizeCollectionsAssets(collections, existingAssets = {}) {
 
     collections.forEach(collection => {
       collection.items.forEach(item => {
@@ -192,16 +229,15 @@ module.exports = class CockpitService {
             path = `${this.baseUrl}/storage/uploads${path}`;
 
             assetField.value = path;
-            assets[path] = null;
+            existingAssets[path] = null;
           });
       });
     });
 
-    return assets;
+    return existingAssets;
   }
 
-  normalizeCollectionsMarkdowns(collections, existingImages, existingAssets) {
-    const markdowns = {};
+  normalizeCollectionsMarkdowns(collections, existingImages, existingAssets, existingMarkdowns = {}) {
 
     collections.forEach(collection => {
       collection.items.forEach(item => {
@@ -210,14 +246,14 @@ module.exports = class CockpitService {
           .forEach(fieldName => {
             const markdownField = item[fieldName];
 
-            markdowns[markdownField.value] = null;
+            existingMarkdowns[markdownField.value] = null;
             extractImagesFromMarkdown(markdownField.value, existingImages);
             extractAssetsFromMarkdown(markdownField.value, existingAssets);
           });
       });
     });
 
-    return markdowns;
+    return existingMarkdowns;
   }
 };
 

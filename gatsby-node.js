@@ -4,6 +4,8 @@ const path = require("path");
 const CockpitService = require("./src/CockpitService");
 const CollectionItemNodeFactory = require("./src/CollectionItemNodeFactory");
 const RegionItemNodeFactory = require("./src/RegionItemNodeFactory");
+const PageItemNodeFactory = require("./src/PageItemNodeFactory");
+
 const {
   MARKDOWN_IMAGE_REGEXP_GLOBAL,
   MARKDOWN_ASSET_REGEXP_GLOBAL
@@ -34,7 +36,24 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   );
 
   const regions = await cockpit.getRegions();
+  await cockpit.normalizeCollectionsImages(regions, images);
+  await cockpit.normalizeCollectionsAssets(regions, assets);
+  await cockpit.normalizeCollectionsMarkdowns(
+    regions,
+    images,
+    assets,
+    markdowns
+  );
 
+  const pages = await cockpit.getPages();
+  await cockpit.normalizeCollectionsImages(pages, images);
+  await cockpit.normalizeCollectionsAssets(pages, assets);
+  await cockpit.normalizeCollectionsMarkdowns(
+    pages,
+    images,
+    assets,
+    markdowns
+  );
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path);
@@ -85,6 +104,20 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     );
 
     region.items.forEach(item => {
+      nodeFactory.create(item);
+    });
+  });
+
+  pages.forEach(page => {
+    const nodeFactory = new PageItemNodeFactory(
+      createNode,
+      page.name,
+      images,
+      assets,
+      markdowns
+    );
+
+    page.items.forEach(item => {
       nodeFactory.create(item);
     });
   });
