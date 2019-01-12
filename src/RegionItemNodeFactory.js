@@ -2,10 +2,10 @@ const {
   createNodeFactory,
   generateNodeId
 } = require("gatsby-node-helpers").default({
-  typePrefix: "Collection"
+  typePrefix: "Region"
 });
 
-module.exports = class CollectionItemNodeFactory {
+module.exports = class RegionItemNodeFactory {
   constructor(createNode, collectionName, images, assets, markdowns) {
     this.createNode = createNode;
     this.collectionName = collectionName;

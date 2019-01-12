@@ -79,6 +79,44 @@ module.exports = class CockpitService {
     return Promise.all(names.map(name => this.getCollection(name)));
   }
 
+  async getRegionNames() {
+    return this.fetch("/regions/listRegions", METHODS.GET);
+  }
+
+  async getRegion(name) {
+    const { fields: regionFields, entries } = await this.fetch(
+      `/regions/get/${name}`,
+      METHODS.GET
+    );
+
+    const items = entries.map(entry =>
+      createCollectionItem(regionFields, entry)
+    );
+
+    for (let index = 0; index < this.locales.length; index++) {
+      const { fields: regionFields, entries } = await this.fetch(
+        `/regions/get/${name}`,
+        METHODS.GET,
+        this.locales[index]
+      );
+
+      items.push(
+        ...entries.map(entry =>
+          createCollectionItem(regionFields, entry, this.locales[index])
+        )
+      );
+    }
+
+    return {items, name};
+  }
+
+  async getRegions() {
+    const names = await this.getRegionNames();
+    return Promise.all(
+      names.map(name => this.getRegion(name))
+    );
+  }
+
   normalizeCollectionsImages(collections) {
     const images = {};
 
@@ -118,7 +156,7 @@ module.exports = class CockpitService {
                 if (path == null) {
                   return;
                 }
-  
+
                 trimGalleryImageField(galleryImageField);
 
                 if (path.startsWith("/")) {
@@ -238,6 +276,12 @@ const createCollectionItem = (
       delete itemField.name;
       delete itemField.localize;
       delete itemField.options;
+      delete itemField.label;
+      delete itemField.lst;
+      delete itemField.width;
+      delete itemField.group;
+      delete itemField.info;
+      delete itemField.default;
       item[collectionFieldName] = itemField;
     }
   });

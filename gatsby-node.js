@@ -3,6 +3,7 @@ const path = require("path");
 
 const CockpitService = require("./src/CockpitService");
 const CollectionItemNodeFactory = require("./src/CollectionItemNodeFactory");
+const RegionItemNodeFactory = require("./src/RegionItemNodeFactory");
 const {
   MARKDOWN_IMAGE_REGEXP_GLOBAL,
   MARKDOWN_ASSET_REGEXP_GLOBAL
@@ -31,6 +32,9 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     images,
     assets
   );
+
+  const regions = await cockpit.getRegions();
+
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path);
@@ -67,6 +71,20 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     );
 
     collection.items.forEach(item => {
+      nodeFactory.create(item);
+    });
+  });
+
+  regions.forEach(region => {
+    const nodeFactory = new RegionItemNodeFactory(
+      createNode,
+      region.name,
+      images,
+      assets,
+      markdowns
+    );
+
+    region.items.forEach(item => {
       nodeFactory.create(item);
     });
   });
