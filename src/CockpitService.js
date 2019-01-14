@@ -322,6 +322,12 @@ const createCollectionItem = (
     }
   });
 
+  if (collectionEntry.hasOwnProperty('children')) {
+    item.children = collectionEntry.children.map((childEntry) => {
+      return createCollectionItem(collectionFields, childEntry, locale);
+    });
+  }
+
   return item;
 };
 
