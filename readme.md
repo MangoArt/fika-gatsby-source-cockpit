@@ -5,6 +5,7 @@ In most cases you should probably prefer to use the @fika release as it might be
 Changes from @fika/gatsby-source:
  - Support for Cockpit Regions (relying on some API changes to the Region module so that it also delivers data schema)
  - Support for Cockpit Pages (custom Cockpit Extension created by MangoART - basically a Rebranded Region module to give customers an easy to understand "Pages" section)
+ - Support for hierarchically structured collections
  - Removal of the unnecessary "type" & "value" nodes for each property (WIP)
 
 Original release notes of @fika/gatsby-source-cockpit below.
