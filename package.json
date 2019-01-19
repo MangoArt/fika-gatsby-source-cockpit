@@ -1,6 +1,6 @@
 {
   "name": "@mangoart/gatsby-source-cockpit",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "This is a fork of @fika/gatsby-source-cockpit and you should probably use their implementation. This is a Gatsby version 2.x.x source plugin that feeds the GraphQL tree with Cockpit Headless CMS data. Actually, it supports querying raw texts (and any trivial field types), Markdown, images, gallery, assets, linked collections and internationalization.",
   "main": "gatsby-node.js",
   "scripts": {
@@ -27,10 +27,16 @@
   "dependencies": {
     "gatsby-node-helpers": "^0.3.0",
     "gatsby-source-filesystem": "^2.0.5",
+    "html-to-react": "^1.3.4",
     "mime": "^2.3.1",
+    "react-styling": "^1.6.4",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
+    "sanitize-html": "^1.20.0",
     "string-hash": "^1.1.3"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "peerDependencies": {
+    "gatsby": ">2.0.0-alpha"
+  }
 }

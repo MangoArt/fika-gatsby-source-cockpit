@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const setFieldsOnGraphQLNodeType = require('./setFieldsOnGraphQLNodeType');
 
 const CockpitService = require("./src/CockpitService");
 const CollectionItemNodeFactory = require("./src/CollectionItemNodeFactory");
@@ -13,6 +14,7 @@ const {
 const FileNodeFactory = require("./src/FileNodeFactory");
 const MarkdownNodeFactory = require("./src/MarkdownNodeFactory");
 
+exports.setFieldsOnGraphQLNodeType = setFieldsOnGraphQLNodeType;
 exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   const { createNode } = actions;
   const cockpit = new CockpitService(
@@ -54,6 +56,10 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     assets,
     markdowns
   );
+
+  cache.set('collections', collections);
+  cache.set('regions', regions);
+  cache.set('pages', pages);
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path);

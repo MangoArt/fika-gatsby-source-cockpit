@@ -1,8 +1,11 @@
 const {
+  TYPE_PREFIX_COCKPIT_PAGE,
+} = require("./constants");
+const {
   createNodeFactory,
   generateNodeId
 } = require("gatsby-node-helpers").default({
-  typePrefix: "Page"
+  typePrefix: TYPE_PREFIX_COCKPIT_PAGE
 });
 
 module.exports = class PageItemNodeFactory {

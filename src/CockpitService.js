@@ -225,7 +225,6 @@ module.exports = class CockpitService {
     }
   }
 
-
   normalizeCollectionsAssets(collections, existingAssets = {}) {
 
     collections.forEach(collection => {

@@ -1,8 +1,11 @@
 const {
+  TYPE_PREFIX_COCKPIT_REGION
+} = require("./constants");
+const {
   createNodeFactory,
   generateNodeId
 } = require("gatsby-node-helpers").default({
-  typePrefix: "Region"
+  typePrefix: TYPE_PREFIX_COCKPIT_REGION
 });
 
 module.exports = class RegionItemNodeFactory {

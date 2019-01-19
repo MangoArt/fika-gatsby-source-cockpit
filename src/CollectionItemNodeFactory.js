@@ -1,8 +1,12 @@
 const {
+  TYPE_PREFIX_COCKPIT_COLLECTION,
+} = require("./constants");
+
+const {
   createNodeFactory,
   generateNodeId
 } = require("gatsby-node-helpers").default({
-  typePrefix: "Collection"
+  typePrefix: TYPE_PREFIX_COCKPIT_COLLECTION
 });
 
 module.exports = class CollectionItemNodeFactory {
