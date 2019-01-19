@@ -27,7 +27,6 @@ module.exports = async (
   { type, store, pathPrefix, getNode, cache },
   { cockpitConfig }
 ) => {
-  console.log(`Type: ${type.name}`);
   if (!type.name.startsWith(TYPE_PREFIX_COCKPIT)) {
     return {};
   }
@@ -114,6 +113,5 @@ module.exports = async (
       };
     });
   });
-  console.log('EXTEND:', nodeExtendType);
   return nodeExtendType;
 };
