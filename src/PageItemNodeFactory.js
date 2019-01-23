@@ -1,11 +1,17 @@
 const {
   TYPE_PREFIX_COCKPIT_PAGE,
+  TYPE_PREFIX_COCKPIT_COLLECTION,
 } = require("./constants");
 const {
   createNodeFactory,
   generateNodeId
 } = require("gatsby-node-helpers").default({
   typePrefix: TYPE_PREFIX_COCKPIT_PAGE
+});
+const {
+  generateNodeId: generateCollectionNodeId
+} = require("gatsby-node-helpers").default({
+  typePrefix: TYPE_PREFIX_COCKPIT_COLLECTION
 });
 
 module.exports = class PageItemNodeFactory {
@@ -94,7 +100,7 @@ const linkCollectionLinkFieldsToCollectionItemNodes = node => {
         });
 
         field.value___NODE = field.value.map(linkedCollection =>
-          generateNodeId(
+          generateCollectionNodeId(
             linkedCollection.link,
             node.lang === "any"
               ? linkedCollection._id
@@ -102,7 +108,7 @@ const linkCollectionLinkFieldsToCollectionItemNodes = node => {
           )
         );
       } else {
-        field.value___NODE = generateNodeId(
+        field.value___NODE = generateCollectionNodeId(
           field.value.link,
           node.lang === "any"
             ? field.value._id
