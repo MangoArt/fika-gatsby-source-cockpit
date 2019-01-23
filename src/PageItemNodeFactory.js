@@ -13,6 +13,7 @@ const {
 } = require("gatsby-node-helpers").default({
   typePrefix: TYPE_PREFIX_COCKPIT_COLLECTION
 });
+const getFieldsOfTypes = require('./helpers.js').getFieldsOfTypes;
 
 module.exports = class PageItemNodeFactory {
   constructor(createNode, collectionName, images, assets, markdowns) {
@@ -24,51 +25,50 @@ module.exports = class PageItemNodeFactory {
   }
 
   create(collectionItem) {
-    this.createNode(
-      createNodeFactory(this.collectionName, node => {
-        node.id = generateNodeId(
-          this.collectionName,
-          node.lang === "any"
-            ? node.cockpitId
-            : `${node.cockpitId}_${node.lang}`
-        );
-        linkImageFieldsToImageNodes(node, this.images);
-        linkAssetFieldsToAssetNodes(node, this.assets);
-        linkMarkdownFieldsToMarkdownNodes(node, this.markdowns);
-        linkCollectionLinkFieldsToCollectionItemNodes(node);
+    const nodeFactory = createNodeFactory(this.collectionName, node => {
+      node.id = generateNodeId(
+        this.collectionName,
+        node.lang === "any"
+          ? node.cockpitId
+          : `${node.cockpitId}_${node.lang}`
+      );
+      linkImageFieldsToImageNodes(node, this.images);
+      linkAssetFieldsToAssetNodes(node, this.assets);
+      linkMarkdownFieldsToMarkdownNodes(node, this.markdowns);
+      linkCollectionLinkFieldsToCollectionItemNodes(node);
 
-        return node;
-      })(collectionItem)
-    );
+      return node;
+    });
+
+    const node = nodeFactory(collectionItem);
+    this.createNode(node);
+    return node;
   }
 };
 
 const linkImageFieldsToImageNodes = (node, images) => {
-  Object.keys(node).forEach(fieldName => {
-    const field = node[fieldName];
-
-    if (field.type === "image") {
+  getFieldsOfTypes(node, ['image'])
+    .forEach(field => {
       field.value___NODE = images[field.value].id;
       delete field.value;
-    } else if (field.type === "gallery") {
+    });
+
+  getFieldsOfTypes(node, ['gallery'])
+    .forEach(field => {
       if (Array.isArray(field.value)) {
         field.value___NODE = field.value.map(
           imageField => images[imageField.value].id
         );
       }
       delete field.value;
-    }
   });
 };
 
 const linkAssetFieldsToAssetNodes = (node, assets) => {
-  Object.keys(node).forEach(fieldName => {
-    const field = node[fieldName];
-
-    if (field.type === "asset") {
+  getFieldsOfTypes(node, ['asset'])
+    .forEach(field => {
       field.value___NODE = assets[field.value].id;
       delete field.value;
-    }
   });
 };
 
@@ -84,10 +84,8 @@ const linkMarkdownFieldsToMarkdownNodes = (node, markdowns) => {
 };
 
 const linkCollectionLinkFieldsToCollectionItemNodes = node => {
-  Object.keys(node).forEach(fieldName => {
-    const field = node[fieldName];
-
-    if (field.type === "collectionlink") {
+  getFieldsOfTypes(node, ['collectionlink'])
+    .forEach(field => {
       if (Array.isArray(field.value)) {
         const collectionName = field.value[0].link;
 
@@ -117,6 +115,5 @@ const linkCollectionLinkFieldsToCollectionItemNodes = node => {
       }
 
       delete field.value;
-    }
   });
 };

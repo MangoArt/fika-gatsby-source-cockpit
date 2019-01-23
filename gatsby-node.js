@@ -29,37 +29,20 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   await cockpit.validateToken();
 
   const collections = await cockpit.getCollections();
-  const images = await cockpit.normalizeCollectionsImages(collections);
-  const assets = await cockpit.normalizeCollectionsAssets(collections);
-  const markdowns = await cockpit.normalizeCollectionsMarkdowns(
-    collections,
-    images,
-    assets
-  );
+  const { images, assets, markdowns } = cockpit.normalizeResources(collections);
 
   const regions = await cockpit.getRegions();
-  await cockpit.normalizeCollectionsImages(regions, images);
-  await cockpit.normalizeCollectionsAssets(regions, assets);
-  await cockpit.normalizeCollectionsMarkdowns(
-    regions,
-    images,
-    assets,
-    markdowns
-  );
+  cockpit.normalizeResources(regions, images, assets, markdowns);
 
   const pages = await cockpit.getPages();
-  await cockpit.normalizeCollectionsImages(pages, images);
-  await cockpit.normalizeCollectionsAssets(pages, assets);
-  await cockpit.normalizeCollectionsMarkdowns(
-    pages,
-    images,
-    assets,
-    markdowns
-  );
+  cockpit.normalizeResources(pages, images, assets, markdowns);
 
   cache.set('collections', collections);
   cache.set('regions', regions);
   cache.set('pages', pages);
+  cache.set('images', images);
+  cache.set('assets', assets);
+  cache.set('markdowns', markdowns);
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path);
