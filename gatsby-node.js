@@ -4,6 +4,7 @@ const setFieldsOnGraphQLNodeType = require('./setFieldsOnGraphQLNodeType')
 
 const CockpitService = require('./src/CockpitService')
 const CollectionItemNodeFactory = require('./src/CollectionItemNodeFactory')
+const CollectionItemNodeFactoryV2 = require('./src/CollectionItemNodeFactoryV2')
 const RegionItemNodeFactory = require('./src/RegionItemNodeFactory')
 const PageItemNodeFactory = require('./src/PageItemNodeFactory')
 
@@ -20,7 +21,8 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   const cockpit = new CockpitService(
     configOptions.baseUrl,
     configOptions.token,
-    configOptions.locales
+    configOptions.locales,
+    configOptions.collections
   )
   const fileNodeFactory = new FileNodeFactory(createNode, store, cache)
   const markdownNodeFactory = new MarkdownNodeFactory(createNode)
@@ -70,12 +72,13 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   }
 
   collections.forEach(collection => {
-    const nodeFactory = new CollectionItemNodeFactory(
+    const nodeFactory = new CollectionItemNodeFactoryV2(
       createNode,
       collection.name,
       images,
       assets,
-      markdowns
+      markdowns,
+      configOptions
     )
 
     collection.items.forEach(item => {

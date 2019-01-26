@@ -1,6 +1,7 @@
 const mime = require('mime')
 const request = require('request-promise')
 const getFieldsOfTypes = require('./helpers.js').getFieldsOfTypes
+const slugify = require('slugify')
 
 const {
   METHODS,
@@ -9,10 +10,11 @@ const {
 } = require('./constants')
 
 module.exports = class CockpitService {
-  constructor(baseUrl, token, locales) {
+  constructor(baseUrl, token, locales, whiteListedCollectionNames = []) {
     this.baseUrl = baseUrl
     this.token = token
     this.locales = locales
+    this.whiteListedCollectionNames = whiteListedCollectionNames
   }
 
   async fetch(endpoint, method, lang = null) {
@@ -54,7 +56,7 @@ module.exports = class CockpitService {
     )
 
     const items = entries.map(entry =>
-      createCollectionItem(collectionFields, entry)
+      createCollectionItem(name, collectionFields, entry)
     )
 
     for (let index = 0; index < this.locales.length; index++) {
@@ -66,7 +68,12 @@ module.exports = class CockpitService {
 
       items.push(
         ...entries.map(entry =>
-          createCollectionItem(collectionFields, entry, this.locales[index])
+          createCollectionItem(
+            name,
+            collectionFields,
+            entry,
+            this.locales[index]
+          )
         )
       )
     }
@@ -76,8 +83,19 @@ module.exports = class CockpitService {
 
   async getCollections() {
     const names = await this.getCollectionNames()
+    const whiteListedNames = this.whiteListedCollectionNames
 
-    return Promise.all(names.map(name => this.getCollection(name)))
+    return Promise.all(
+      names
+        .filter(
+          name =>
+            whiteListedNames === null ||
+            (Array.isArray(whiteListedNames) &&
+              whiteListedNames.length === 0) ||
+            whiteListedNames.includes(name)
+        )
+        .map(name => this.getCollection(name))
+    )
   }
 
   async getRegionNames() {
@@ -186,8 +204,6 @@ module.exports = class CockpitService {
           return
         }
 
-        trimAssetField(imageField)
-
         if (path.startsWith('/')) {
           path = `${this.baseUrl}${path}`
         } else if (!path.startsWith('http')) {
@@ -198,6 +214,7 @@ module.exports = class CockpitService {
         existingImages[path] = null
       } else {
         const galleryField = field
+
         galleryField.value.forEach(galleryImageField => {
           let path = galleryImageField.path
 
@@ -301,6 +318,7 @@ const trimGalleryImageField = galleryImageField => {
 }
 
 const createCollectionItem = (
+  collectionName,
   collectionFields,
   collectionEntry,
   locale = null,
@@ -315,20 +333,27 @@ const createCollectionItem = (
   Object.keys(collectionFields).reduce((accumulator, collectionFieldName) => {
     const collectionFieldValue = collectionEntry[collectionFieldName]
     const collectionFieldConfiguration = collectionFields[collectionFieldName]
-
     const field = createCollectionField(
+      collectionName,
       collectionFieldValue,
       collectionFieldConfiguration
     )
+
     if (field !== null) {
       accumulator[collectionFieldName] = field
     }
+
     return accumulator
   }, item)
 
   if (collectionEntry.hasOwnProperty('children')) {
     item.children = collectionEntry.children.map(childEntry => {
-      return createCollectionItem(collectionFields, childEntry, locale)
+      return createCollectionItem(
+        collectionFields,
+        childEntry,
+        locale,
+        level + 1
+      )
     })
   }
 
@@ -336,6 +361,7 @@ const createCollectionItem = (
 }
 
 const createCollectionField = (
+  collectionName,
   collectionFieldValue,
   collectionFieldConfiguration
 ) => {
@@ -354,23 +380,46 @@ const createCollectionField = (
 
     if (collectionFieldType === 'repeater') {
       const repeaterFieldOptions = collectionFieldConfiguration.options || {}
+
       if (typeof repeaterFieldOptions.field !== 'undefined') {
         itemField.value = collectionFieldValue.map(repeaterEntry =>
-          createCollectionField(repeaterEntry.value, repeaterFieldOptions.field)
+          createCollectionField(
+            collectionName,
+            repeaterEntry.value,
+            repeaterFieldOptions.field
+          )
         )
-      } else if (repeaterFieldOptions.fields !== 'undefined') {
+      } else if (typeof repeaterFieldOptions.fields !== 'undefined') {
         itemField.value = collectionFieldValue.map(repeaterEntry =>
           repeaterFieldOptions.fields.reduce(
             (accumulator, currentFieldConfiguration) => {
+              if (
+                typeof currentFieldConfiguration.name === 'undefined' &&
+                currentFieldConfiguration.label === repeaterEntry.field.label
+              ) {
+                const generatedNameProperty = slugify(
+                  currentFieldConfiguration.label,
+                  { lower: true }
+                )
+                console.warn(
+                  `\nRepeater field without 'name' attribute used in collection '${collectionName}'. ` +
+                    `Using value '${generatedNameProperty}' for name (generated from the label).`
+                )
+                currentFieldConfiguration.name = generatedNameProperty
+                repeaterEntry.field.name = generatedNameProperty
+              }
+
               if (currentFieldConfiguration.name === repeaterEntry.field.name) {
                 accumulator.valueType = currentFieldConfiguration.name
                 accumulator.value[
                   currentFieldConfiguration.name
                 ] = createCollectionField(
+                  collectionName,
                   repeaterEntry.value,
                   currentFieldConfiguration
                 )
               }
+
               return accumulator
             },
             { type: 'set', value: {} }
@@ -379,13 +428,16 @@ const createCollectionField = (
       }
     } else if (collectionFieldType === 'set') {
       const setFieldOptions = collectionFieldConfiguration.options || {}
+
       itemField.value = setFieldOptions.fields.reduce(
         (accumulator, currentFieldConfiguration) => {
           const currentFieldName = currentFieldConfiguration.name
           accumulator[currentFieldName] = createCollectionField(
+            collectionName,
             collectionFieldValue[currentFieldName],
             currentFieldConfiguration
           )
+
           return accumulator
         },
         {}
@@ -393,8 +445,10 @@ const createCollectionField = (
     } else {
       itemField.value = collectionFieldValue
     }
+
     return itemField
   }
+
   return null
 }
 
