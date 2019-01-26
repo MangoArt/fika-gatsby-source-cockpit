@@ -341,6 +341,10 @@ const createCollectionItem = (
     level: level,
   }
 
+  if (collectionEntry.hasOwnProperty('_o')) {
+    item.order = collectionEntry._o
+  }
+
   Object.keys(collectionFields).reduce((accumulator, collectionFieldName) => {
     const collectionFieldValue = collectionEntry[collectionFieldName]
     const collectionFieldConfiguration = collectionFields[collectionFieldName]

@@ -72,7 +72,7 @@ const generateNodeData = (item, resources) => {
   // TODO: change this to a reduce implementation
   // TODO: add context information (hierarchy in tree) to fieldData
   Object.keys(item).forEach(name => {
-    if (['cockpitId', 'lang', 'level'].includes(name)) {
+    if (['cockpitId', 'lang', 'level', 'order'].includes(name)) {
       result[name] = item[name]
     } else if (['children', 'parent'].includes(name)) {
       // do nothing as we handle this values later in the process
