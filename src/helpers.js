@@ -1,20 +1,16 @@
 function getFieldsOfTypes(item, types) {
   const fieldsOfTypes = Object.keys(item)
-    .filter(fieldName =>
-      item[fieldName] && types.includes(item[fieldName].type)
+    .filter(
+      fieldName => item[fieldName] && types.includes(item[fieldName].type)
     )
-    .map(fieldName => (
-      item[fieldName]
-    ));
+    .map(fieldName => item[fieldName])
 
   // process fields nested in set
   Object.keys(item)
-    .filter(
-      fieldName => !!item[fieldName] && item[fieldName].type === 'set'
-    )
+    .filter(fieldName => !!item[fieldName] && item[fieldName].type === 'set')
     .forEach(fieldName => {
       fieldsOfTypes.push(...getFieldsOfTypes(item[fieldName].value, types))
-    });
+    })
 
   // process fields nested in repeater
   Object.keys(item)
@@ -23,11 +19,13 @@ function getFieldsOfTypes(item, types) {
     )
     .forEach(fieldName => {
       item[fieldName].value.forEach(repeaterEntry => {
-        fieldsOfTypes.push(...getFieldsOfTypes({ repeater: repeaterEntry }, types))
+        fieldsOfTypes.push(
+          ...getFieldsOfTypes({ repeater: repeaterEntry }, types)
+        )
       })
-    });
+    })
 
-  return fieldsOfTypes;
+  return fieldsOfTypes
 }
 
-module.exports.getFieldsOfTypes = getFieldsOfTypes;
+module.exports.getFieldsOfTypes = getFieldsOfTypes
