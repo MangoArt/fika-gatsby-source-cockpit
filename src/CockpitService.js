@@ -258,6 +258,15 @@ module.exports = class CockpitService {
       existingAssets[path] = null
     })
 
+    getFieldsOfTypes(item, ['file']).forEach(fileField => {
+      let path = fileField.value
+
+      path = `${this.baseUrl}/${path}`
+
+      fileField.value = path
+      existingAssets[path] = null
+    })
+
     if (Array.isArray(item.children)) {
       item.children.forEach(child => {
         this.normalizeCollectionItemAssets(child, existingAssets)
@@ -326,7 +335,6 @@ const createCollectionItem = (
   locale = null,
   level = 1
 ) => {
-  console.log(collectionEntry)
   const item = {
     cockpitId: collectionEntry._id,
     lang: locale == null ? 'any' : locale,
