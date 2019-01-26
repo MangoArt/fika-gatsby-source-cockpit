@@ -3,10 +3,9 @@ const path = require('path')
 const setFieldsOnGraphQLNodeType = require('./setFieldsOnGraphQLNodeType')
 
 const CockpitService = require('./src/CockpitService')
-const CollectionItemNodeFactory = require('./src/CollectionItemNodeFactory')
-const CollectionItemNodeFactoryV2 = require('./src/CollectionItemNodeFactoryV2')
-const RegionItemNodeFactory = require('./src/RegionItemNodeFactory')
-const PageItemNodeFactory = require('./src/PageItemNodeFactory')
+const CollectionItemNodeFactory = require('./src/CollectionItemNodeFactoryV2')
+const RegionItemNodeFactory = require('./src/RegionItemNodeFactoryV2')
+const PageItemNodeFactory = require('./src/PageItemNodeFactoryV2')
 
 const {
   MARKDOWN_IMAGE_REGEXP_GLOBAL,
@@ -72,7 +71,7 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   }
 
   collections.forEach(collection => {
-    const nodeFactory = new CollectionItemNodeFactoryV2(
+    const nodeFactory = new CollectionItemNodeFactory(
       createNode,
       collection.name,
       images,
@@ -92,7 +91,8 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
       region.name,
       images,
       assets,
-      markdowns
+      markdowns,
+      configOptions
     )
 
     region.items.forEach(item => {
@@ -106,7 +106,8 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
       page.name,
       images,
       assets,
-      markdowns
+      markdowns,
+      configOptions
     )
 
     page.items.forEach(item => {

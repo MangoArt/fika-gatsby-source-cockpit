@@ -109,7 +109,7 @@ module.exports = class CockpitService {
     )
 
     const items = entries.map(entry =>
-      createCollectionItem(regionFields, entry)
+      createCollectionItem(name, regionFields, entry)
     )
 
     for (let index = 0; index < this.locales.length; index++) {
@@ -121,7 +121,7 @@ module.exports = class CockpitService {
 
       items.push(
         ...entries.map(entry =>
-          createCollectionItem(regionFields, entry, this.locales[index])
+          createCollectionItem(name, regionFields, entry, this.locales[index])
         )
       )
     }
@@ -144,7 +144,9 @@ module.exports = class CockpitService {
       METHODS.GET
     )
 
-    const items = entries.map(entry => createCollectionItem(pageFields, entry))
+    const items = entries.map(entry =>
+      createCollectionItem(name, pageFields, entry)
+    )
 
     for (let index = 0; index < this.locales.length; index++) {
       const { fields: pageFields, entries } = await this.fetch(
@@ -155,7 +157,7 @@ module.exports = class CockpitService {
 
       items.push(
         ...entries.map(entry =>
-          createCollectionItem(pageFields, entry, this.locales[index])
+          createCollectionItem(name, pageFields, entry, this.locales[index])
         )
       )
     }
@@ -324,6 +326,7 @@ const createCollectionItem = (
   locale = null,
   level = 1
 ) => {
+  console.log(collectionEntry)
   const item = {
     cockpitId: collectionEntry._id,
     lang: locale == null ? 'any' : locale,
@@ -349,6 +352,7 @@ const createCollectionItem = (
   if (collectionEntry.hasOwnProperty('children')) {
     item.children = collectionEntry.children.map(childEntry => {
       return createCollectionItem(
+        collectionName,
         collectionFields,
         childEntry,
         locale,

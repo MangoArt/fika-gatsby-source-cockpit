@@ -4,12 +4,18 @@ const {
   createNodeFactory,
   generateNodeId,
 } = require('gatsby-node-helpers').default({
+  typePrefix: 'CockpitRegion',
+})
+
+const {
+  generateNodeId: generateCollectionNodeId,
+} = require('gatsby-node-helpers').default({
   typePrefix: 'CockpitCollection',
 })
 
 // TODO: add option to enabled "default" values that are not erased in the Graphql tree
 // TODO: do we need a class? most of the rest of the code is functional
-module.exports = class NewCollectionItemNodeFactory {
+module.exports = class RegionItemNodeFactoryV2 {
   constructor(createNode, collectionName, images, assets, markdowns, config) {
     this.createNode = createNode
     this.collectionName = collectionName
@@ -44,12 +50,12 @@ module.exports = class NewCollectionItemNodeFactory {
     const CollectionItem = createNodeFactory(this.collectionName, node => {
       node.id = generateNodeIdFromItem(node)
 
-      if (Array.isArray(node.childNodes)) {
-        node.children___NODE = node.childNodes.map(child => {
+      if (Array.isArray(node.children)) {
+        node.children___NODE = node.children.map(child => {
           child.parent___NODE = node.id
           return child.id
         })
-        delete node.childNodes
+        delete node.children
       }
 
       return node
@@ -60,7 +66,7 @@ module.exports = class NewCollectionItemNodeFactory {
         ...this.resources,
         item: collectionItem,
       }),
-      childNodes: children,
+      children,
     })
     this.createNode(node)
     return node
@@ -221,7 +227,7 @@ const transformCollectionLinkFieldValue = ({ name, value }, { item }) => {
     })
 
     const result = value.map(linkedCollection =>
-      generateNodeId(
+      generateCollectionNodeId(
         linkedCollection.link,
         item.lang === 'any'
           ? linkedCollection._id
@@ -230,7 +236,7 @@ const transformCollectionLinkFieldValue = ({ name, value }, { item }) => {
     )
     return [`${name}___NODE`, result]
   } else {
-    const linkedNodeId = generateNodeId(
+    const linkedNodeId = generateCollectionNodeId(
       value.link,
       item.lang === 'any' ? value._id : `${value._id}_${item.lang}`
     )
