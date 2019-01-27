@@ -200,6 +200,9 @@ module.exports = class CockpitService {
     getFieldsOfTypes(item, ['image', 'gallery']).forEach(field => {
       if (!Array.isArray(field.value)) {
         const imageField = field
+        if (!imageField.value) {
+          return
+        }
         let path = imageField.value.path
 
         if (path == null) {
@@ -383,89 +386,100 @@ const createCollectionField = (
 ) => {
   const collectionFieldType = collectionFieldConfiguration.type
 
-  if (
+  /* if (
     !(
       Array.isArray(collectionFieldValue) && collectionFieldValue.length === 0
     ) &&
     collectionFieldValue != null &&
-    collectionFieldValue !== ''
-  ) {
-    const itemField = {
-      type: collectionFieldType,
-    }
-
-    if (collectionFieldType === 'repeater') {
-      const repeaterFieldOptions = collectionFieldConfiguration.options || {}
-
-      if (typeof repeaterFieldOptions.field !== 'undefined') {
-        itemField.value = collectionFieldValue.map(repeaterEntry =>
-          createCollectionField(
-            collectionName,
-            repeaterEntry.value,
-            repeaterFieldOptions.field
-          )
-        )
-      } else if (typeof repeaterFieldOptions.fields !== 'undefined') {
-        itemField.value = collectionFieldValue.map(repeaterEntry =>
-          repeaterFieldOptions.fields.reduce(
-            (accumulator, currentFieldConfiguration) => {
-              if (
-                typeof currentFieldConfiguration.name === 'undefined' &&
-                currentFieldConfiguration.label === repeaterEntry.field.label
-              ) {
-                const generatedNameProperty = slugify(
-                  currentFieldConfiguration.label,
-                  { lower: true }
-                )
-                console.warn(
-                  `\nRepeater field without 'name' attribute used in collection '${collectionName}'. ` +
-                    `Using value '${generatedNameProperty}' for name (generated from the label).`
-                )
-                currentFieldConfiguration.name = generatedNameProperty
-                repeaterEntry.field.name = generatedNameProperty
-              }
-
-              if (currentFieldConfiguration.name === repeaterEntry.field.name) {
-                accumulator.valueType = currentFieldConfiguration.name
-                accumulator.value[
-                  currentFieldConfiguration.name
-                ] = createCollectionField(
-                  collectionName,
-                  repeaterEntry.value,
-                  currentFieldConfiguration
-                )
-              }
-
-              return accumulator
-            },
-            { type: 'set', value: {} }
-          )
-        )
-      }
-    } else if (collectionFieldType === 'set') {
-      const setFieldOptions = collectionFieldConfiguration.options || {}
-
-      itemField.value = setFieldOptions.fields.reduce(
-        (accumulator, currentFieldConfiguration) => {
-          const currentFieldName = currentFieldConfiguration.name
-          accumulator[currentFieldName] = createCollectionField(
-            collectionName,
-            collectionFieldValue[currentFieldName],
-            currentFieldConfiguration
-          )
-
-          return accumulator
-        },
-        {}
-      )
-    } else {
-      itemField.value = collectionFieldValue
-    }
-
-    return itemField
+     collectionFieldValue !== ''
+  ) { */
+  const itemField = {
+    type: collectionFieldType,
   }
 
-  return null
+  if (collectionFieldType === 'repeater') {
+    const repeaterFieldOptions = collectionFieldConfiguration.options || {}
+
+    if (
+      (Array.isArray(collectionFieldValue) &&
+        collectionFieldValue.length === 0) ||
+      collectionFieldValue === null ||
+      collectionFieldValue === ''
+    ) {
+      itemField.value = []
+    } else if (typeof repeaterFieldOptions.field !== 'undefined') {
+      itemField.value = collectionFieldValue.map(repeaterEntry =>
+        createCollectionField(
+          collectionName,
+          repeaterEntry.value,
+          repeaterFieldOptions.field
+        )
+      )
+    } else if (typeof repeaterFieldOptions.fields !== 'undefined') {
+      itemField.value = collectionFieldValue.map(repeaterEntry =>
+        repeaterFieldOptions.fields.reduce(
+          (accumulator, currentFieldConfiguration) => {
+            if (
+              typeof currentFieldConfiguration.name === 'undefined' &&
+              currentFieldConfiguration.label === repeaterEntry.field.label
+            ) {
+              const generatedNameProperty = slugify(
+                currentFieldConfiguration.label,
+                { lower: true }
+              )
+              console.warn(
+                `\nRepeater field without 'name' attribute used in collection '${collectionName}'. ` +
+                  `Using value '${generatedNameProperty}' for name (generated from the label).`
+              )
+              currentFieldConfiguration.name = generatedNameProperty
+              repeaterEntry.field.name = generatedNameProperty
+            }
+
+            if (currentFieldConfiguration.name === repeaterEntry.field.name) {
+              accumulator.valueType = currentFieldConfiguration.name
+              accumulator.value[
+                currentFieldConfiguration.name
+              ] = createCollectionField(
+                collectionName,
+                repeaterEntry.value,
+                currentFieldConfiguration
+              )
+            }
+
+            return accumulator
+          },
+          { type: 'set', value: {} }
+        )
+      )
+    }
+  } else if (collectionFieldType === 'set') {
+    const setFieldOptions = collectionFieldConfiguration.options || {}
+
+    if (collectionFieldValue === null) {
+      return {}
+    }
+
+    itemField.value = setFieldOptions.fields.reduce(
+      (accumulator, currentFieldConfiguration) => {
+        const currentFieldName = currentFieldConfiguration.name
+        accumulator[currentFieldName] = createCollectionField(
+          collectionName,
+          collectionFieldValue[currentFieldName],
+          currentFieldConfiguration
+        )
+
+        return accumulator
+      },
+      {}
+    )
+  } else {
+    itemField.value = collectionFieldValue
+  }
+
+  return itemField
+  /* }
+
+  return null */
 }
 
 const extractImagesFromMarkdown = (markdown, existingImages) => {

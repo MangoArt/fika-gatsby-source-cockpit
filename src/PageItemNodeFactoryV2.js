@@ -102,7 +102,9 @@ const processField = (fieldData, resources) => {
   // TODO: add check if type is present
   if (!valueTransformers.hasOwnProperty(type)) {
     console.warn(
-      `Unknown field type '${type}' found for field '${name}' - skipping field.`
+      `Unknown field type '${type}' found for field '${name}' in ${
+        resources.collectionName
+      } - skipping field.`
     )
     return [name, null]
   }
@@ -163,6 +165,12 @@ const transformHTMLFieldValue = ({ name, value }) => {
   //  - parse HTML Code into react representation
   //  - validate html code and strip stuff we don't want
   //  - replace image URLS
+  /* if (value.length < 10) {
+    console.log("HTML field value: ", value);
+  } */
+  if (!value) {
+    return [name, '_cockpit-field-empty_']
+  }
   return [name, value]
 }
 
@@ -247,8 +255,8 @@ const transformCollectionLinkFieldValue = ({ name, value }, { item }) => {
 // TODO: extract this all to a different file/module/class
 const valueTransformers = {
   // for these types we just copy the values from Cockpit without modification
-  text: transformScalarFieldValue, // TODO: strip html tags (on demand)
-  textarea: transformScalarFieldValue, // TODO: strip html tags (on demand)
+  text: transformHTMLFieldValue, // TODO: strip html tags (on demand)
+  textarea: transformHTMLFieldValue, // TODO: strip html tags (on demand)
   boolean: transformScalarFieldValue,
   code: transformScalarFieldValue,
   rating: transformScalarFieldValue,
