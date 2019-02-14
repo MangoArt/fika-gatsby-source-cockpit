@@ -229,12 +229,14 @@ const transformCollectionLinkFieldValue = ({ name, value }, { item }) => {
       )
     )
     return [`${name}___NODE`, result]
-  } else {
+  } else if (value) {
     const linkedNodeId = generateNodeId(
       value.link,
       item.lang === 'any' ? value._id : `${value._id}_${item.lang}`
     )
     return [`${name}___NODE`, linkedNodeId]
+  } else {
+    return [{ name }, null]
   }
 }
 
