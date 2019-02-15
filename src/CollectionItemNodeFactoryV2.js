@@ -120,7 +120,8 @@ const transformImageFieldValue = ({ name, value }, { images }) => {
   if (images.hasOwnProperty(value)) {
     return [`${name}___NODE`, images[value].id]
   }
-  return [name, null]
+
+  return [`${name}___NODE`, images['https://via.placeholder.com/350x150'].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {
@@ -157,6 +158,12 @@ const transformHTMLFieldValue = ({ name, value }) => {
   //  - parse HTML Code into react representation
   //  - validate html code and strip stuff we don't want
   //  - replace image URLS
+  /* if (value.length < 10) {
+    console.log("HTML field value: ", value);
+  } */
+  if (!value) {
+    return [name, '_cockpit-field-empty_']
+  }
   return [name, value]
 }
 

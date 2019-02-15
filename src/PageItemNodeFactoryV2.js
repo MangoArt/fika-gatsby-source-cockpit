@@ -128,7 +128,8 @@ const transformImageFieldValue = ({ name, value }, { images }) => {
   if (images.hasOwnProperty(value)) {
     return [`${name}___NODE`, images[value].id]
   }
-  return [name, null]
+
+  return [`${name}___NODE`, images['https://via.placeholder.com/350x150'].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {
