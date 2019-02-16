@@ -121,7 +121,7 @@ const transformImageFieldValue = ({ name, value }, { images }) => {
     return [`${name}___NODE`, images[value].id]
   }
 
-  return [`${name}___NODE`, images['https://via.placeholder.com/350x150'].id]
+  return [`${name}___NODE`, images['https://via.placeholder.com/1600x1200'].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {
@@ -250,13 +250,13 @@ const transformCollectionLinkFieldValue = ({ name, value }, { item }) => {
 // TODO: extract this all to a different file/module/class
 const valueTransformers = {
   // for these types we just copy the values from Cockpit without modification
-  text: transformScalarFieldValue, // TODO: strip html tags (on demand)
-  textarea: transformScalarFieldValue, // TODO: strip html tags (on demand)
+  text: transformHTMLFieldValue, // TODO: strip html tags (on demand)
+  textarea: transformHTMLFieldValue, // TODO: strip html tags (on demand)
   boolean: transformScalarFieldValue,
   code: transformScalarFieldValue,
   rating: transformScalarFieldValue,
   location: transformScalarFieldValue, // TODO: address field might not be set
-  select: transformScalarFieldValue,
+  select: transformHTMLFieldValue,
   multipleselect: transformScalarFieldValue,
   tags: transformScalarFieldValue,
   date: transformScalarFieldValue, // TODO: parse date

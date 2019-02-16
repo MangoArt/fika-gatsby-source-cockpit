@@ -129,7 +129,7 @@ const transformImageFieldValue = ({ name, value }, { images }) => {
     return [`${name}___NODE`, images[value].id]
   }
 
-  return [`${name}___NODE`, images['https://via.placeholder.com/350x150'].id]
+  return [`${name}___NODE`, images['https://via.placeholder.com/1600x1200'].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {
@@ -262,7 +262,7 @@ const valueTransformers = {
   code: transformScalarFieldValue,
   rating: transformScalarFieldValue,
   location: transformScalarFieldValue, // TODO: address field might not be set
-  select: transformScalarFieldValue,
+  select: transformHTMLFieldValue,
   multipleselect: transformScalarFieldValue,
   tags: transformScalarFieldValue,
   date: transformScalarFieldValue, // TODO: parse date
@@ -274,6 +274,7 @@ const valueTransformers = {
 
   // files & images are downloaded and stored in separate nodes, we just need to link them
   asset: transformAssetFieldValue, // TODO: evaluate metadata
+  file: transformAssetFieldValue, // TODO: implement
   image: transformImageFieldValue, // TODO: evaluate metadata
   gallery: transformGalleryFieldValue, // TODO: evaluate metadata
 
@@ -295,7 +296,6 @@ const valueTransformers = {
   // not implemented yet but should be possible to implement
   'access-list': transformUnsupportedTypeFiledValue, // TODO: implement
   'account-link': transformUnsupportedTypeFiledValue, // TODO: implement
-  file: transformUnsupportedTypeFiledValue, // TODO: implement
 
   // password is returned encoded; there is probably no situation where this will
   // be useful in Gatsby therefore we just print a warning and ignore it for now.

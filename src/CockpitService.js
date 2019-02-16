@@ -454,17 +454,12 @@ const createCollectionField = (
     }
   } else if (collectionFieldType === 'set') {
     const setFieldOptions = collectionFieldConfiguration.options || {}
-
-    if (collectionFieldValue === null) {
-      return {}
-    }
-
     itemField.value = setFieldOptions.fields.reduce(
       (accumulator, currentFieldConfiguration) => {
         const currentFieldName = currentFieldConfiguration.name
         accumulator[currentFieldName] = createCollectionField(
           collectionName,
-          collectionFieldValue[currentFieldName],
+          collectionFieldValue ? collectionFieldValue[currentFieldName] : null,
           currentFieldConfiguration
         )
 

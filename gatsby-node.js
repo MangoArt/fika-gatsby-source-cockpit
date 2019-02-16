@@ -46,7 +46,7 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   cache.set('markdowns', markdowns)
 
   // add placeholder image
-  images['https://via.placeholder.com/350x150'] = null
+  images['https://via.placeholder.com/1600x1200'] = null
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path)
