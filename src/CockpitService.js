@@ -454,19 +454,26 @@ const createCollectionField = (
     }
   } else if (collectionFieldType === 'set') {
     const setFieldOptions = collectionFieldConfiguration.options || {}
-    itemField.value = setFieldOptions.fields.reduce(
-      (accumulator, currentFieldConfiguration) => {
-        const currentFieldName = currentFieldConfiguration.name
-        accumulator[currentFieldName] = createCollectionField(
-          collectionName,
-          collectionFieldValue ? collectionFieldValue[currentFieldName] : null,
-          currentFieldConfiguration
-        )
+    if (setFieldOptions.fields) {
+      itemField.value = setFieldOptions.fields.reduce(
+        (accumulator, currentFieldConfiguration) => {
+          const currentFieldName = currentFieldConfiguration.name
+          accumulator[currentFieldName] = createCollectionField(
+            collectionName,
+            collectionFieldValue
+              ? collectionFieldValue[currentFieldName]
+              : null,
+            currentFieldConfiguration
+          )
 
-        return accumulator
-      },
-      {}
-    )
+          return accumulator
+        },
+        {}
+      )
+    } else {
+      // TODO: report error
+      itemField.value = {}
+    }
   } else {
     itemField.value = collectionFieldValue
   }
