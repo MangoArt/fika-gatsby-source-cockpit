@@ -46,13 +46,17 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   cache.set('markdowns', markdowns)
 
   // add placeholder image
-  images['https://via.placeholder.com/1600x1200'] = null
+  images['https://placekitten.com/1600/1200'] = null
 
   for (let path in images) {
     const imageNode = await fileNodeFactory.createImageNode(path)
-    images[path] = {
-      localPath: copyFileToStaticFolder(imageNode),
-      id: imageNode.id,
+    try {
+      images[path] = {
+        localPath: copyFileToStaticFolder(imageNode),
+        id: imageNode.id,
+      }
+    } catch (e) {
+      console.error('Error downloading ', path)
     }
   }
 

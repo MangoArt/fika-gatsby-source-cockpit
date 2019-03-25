@@ -117,16 +117,19 @@ const transformAssetFieldValue = ({ name, value }, { assets }) => {
 }
 
 const transformImageFieldValue = ({ name, value }, { images }) => {
-  if (images.hasOwnProperty(value)) {
+  if (images.hasOwnProperty(value) && images[value] !== null) {
     return [`${name}___NODE`, images[value].id]
+  } else if (images.hasOwnProperty(value)) {
+    console.error('Failed to find image for url: ', value)
   }
 
-  return [`${name}___NODE`, images['https://via.placeholder.com/1600x1200'].id]
+  return [`${name}___NODE`, images['https://placekitten.com/1600/1200'].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {
-  if (Array.isArray(value)) {
+  if (Array.isArray(value) && value.length > 0) {
     const result = value
+      .filter(({ value: imageUrl }) => !!images[imageUrl])
       .map(({ value: imageUrl }) =>
         images.hasOwnProperty(imageUrl) ? images[imageUrl].id : null
       )
@@ -134,7 +137,7 @@ const transformGalleryFieldValue = ({ name, value }, { images }) => {
     return [`${name}___NODE`, result]
   }
 
-  return [fieldName, []]
+  return [`${name}___NODE`, []]
 }
 
 const transformColorFieldValue = ({ name, value }) => {

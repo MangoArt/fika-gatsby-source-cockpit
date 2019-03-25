@@ -251,6 +251,10 @@ module.exports = class CockpitService {
 
   normalizeCollectionItemAssets(item, existingAssets) {
     getFieldsOfTypes(item, ['asset']).forEach(assetField => {
+      if (!assetField.value) {
+        return
+      }
+
       let path = assetField.value.path
 
       trimAssetField(assetField)
@@ -262,6 +266,10 @@ module.exports = class CockpitService {
     })
 
     getFieldsOfTypes(item, ['file']).forEach(fileField => {
+      if (!fileField.value) {
+        return
+      }
+
       let path = fileField.value
 
       path = `${this.baseUrl}/${path}`
