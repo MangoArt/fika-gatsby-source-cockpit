@@ -116,14 +116,16 @@ const transformAssetFieldValue = ({ name, value }, { assets }) => {
   return [name, null]
 }
 
-const transformImageFieldValue = ({ name, value }, { images }) => {
+const transformImageFieldValue = ({ name, value }, { images, config }) => {
   if (images.hasOwnProperty(value) && images[value] !== null) {
     return [`${name}___NODE`, images[value].id]
   } else if (images.hasOwnProperty(value)) {
     console.error('Failed to find image for url: ', value)
   }
 
-  return [`${name}___NODE`, images['https://placekitten.com/1600/1200'].id]
+  const noImagePlaceholderUrl =
+    config.noImagePlaceholderUrl || 'https://placekitten.com/1600/1200'
+  return [`${name}___NODE`, images[noImagePlaceholderUrl].id]
 }
 
 const transformGalleryFieldValue = ({ name, value }, { images }) => {

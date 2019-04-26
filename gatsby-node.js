@@ -46,22 +46,53 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
   cache.set('markdowns', markdowns)
 
   // add placeholder image
-  images['https://placekitten.com/1600/1200'] = null
+  const brokenImagePlaceholderUrl =
+    configOptions.brokenImagePlaceholderUrl || null
+  const brokenImagePlaceholderImageNode = brokenImagePlaceholderUrl
+    ? await fileNodeFactory.createImageNode(
+        encodeURI(brokenImagePlaceholderUrl)
+      )
+    : null
+  const brokenImagePlaceholderLocalPath = brokenImagePlaceholderImageNode
+    ? copyFileToStaticFolder(brokenImagePlaceholderImageNode)
+    : null
+
+  // add no image placeholder URL => used to complete the schema
+  const noImagePlaceholderUrl =
+    configOptions.noImagePlaceholderUrl || 'https://placekitten.com/1600/1200'
+  images[noImagePlaceholderUrl] = null
 
   for (let path in images) {
-    const imageNode = await fileNodeFactory.createImageNode(path)
-    try {
-      images[path] = {
-        localPath: copyFileToStaticFolder(imageNode),
-        id: imageNode.id,
+    const imageNode = await fileNodeFactory.createImageNode(encodeURI(path))
+    if (imageNode) {
+      try {
+        images[path] = {
+          localPath: copyFileToStaticFolder(imageNode),
+          id: imageNode.id,
+        }
+      } catch (e) {
+        console.error('Error copying image to static folder ', path)
       }
-    } catch (e) {
-      console.error('Error downloading ', path)
+    } else {
+      if (brokenImagePlaceholderUrl) {
+        images[path] = {
+          localPath: brokenImagePlaceholderLocalPath,
+          id: brokenImagePlaceholderImageNode.id,
+        }
+      }
+    }
+  }
+
+  // TODO: I probably can remove this
+  if (brokenImagePlaceholderUrl) {
+    images[brokenImagePlaceholderUrl] = {
+      localPath: brokenImagePlaceholderLocalPath,
+      id: brokenImagePlaceholderImageNode.id,
     }
   }
 
   for (let path in assets) {
-    const assetNode = await fileNodeFactory.createAssetNode(path)
+    const assetNode = await fileNodeFactory.createAssetNode(encodeURI(path))
     assets[path] = {
       localPath: copyFileToStaticFolder(assetNode),
       id: assetNode.id,
