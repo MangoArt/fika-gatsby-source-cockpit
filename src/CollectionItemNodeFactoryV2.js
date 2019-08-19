@@ -45,7 +45,7 @@ module.exports = class NewCollectionItemNodeFactory {
       node.id = generateNodeIdFromItem(node)
 
       if (Array.isArray(node.childNodes)) {
-        node.children___NODE = node.childNodes.map(child => {
+        node.cockpitChildren___NODE = node.childNodes.map(child => {
           child.parent___NODE = node.id
           return child.id
         })
