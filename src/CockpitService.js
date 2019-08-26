@@ -10,18 +10,27 @@ const {
 } = require('./constants')
 
 module.exports = class CockpitService {
-  constructor(baseUrl, token, locales, whiteListedCollectionNames = []) {
+  constructor(
+    baseUrl,
+    token,
+    locales,
+    defaultLocale,
+    whiteListedCollectionNames = []
+  ) {
     this.baseUrl = baseUrl
     this.token = token
     this.locales = locales
+    this.defaultLocale = defaultLocale
     this.whiteListedCollectionNames = whiteListedCollectionNames
   }
 
   async fetch(endpoint, method, lang = null) {
+    const uri = `${this.baseUrl}/api${endpoint}?token=${this.token}${
+      lang ? `&lang=${lang}` : ''
+    }`
+
     return request({
-      uri: `${this.baseUrl}/api${endpoint}?token=${this.token}${
-        lang ? `&lang=${lang}` : ''
-      }`,
+      uri,
       method,
       json: true,
     })
@@ -56,7 +65,7 @@ module.exports = class CockpitService {
     )
 
     const items = entries.map(entry =>
-      createCollectionItem(name, collectionFields, entry)
+      createCollectionItem(name, collectionFields, entry, this.defaultLocale)
     )
 
     for (let index = 0; index < this.locales.length; index++) {
@@ -71,7 +80,7 @@ module.exports = class CockpitService {
           createCollectionItem(
             name,
             collectionFields,
-            entry,
+            this.extractLanguageValues(entry, this.locales[index]),
             this.locales[index]
           )
         )
@@ -79,6 +88,48 @@ module.exports = class CockpitService {
     }
 
     return { items, name }
+  }
+
+  extractLanguageValues(entry, locale) {
+    if (entry === null) {
+      return null
+    }
+    const value = {}
+    Object.keys(entry).forEach(key => {
+      if (
+        key.endsWith(`_${locale}`) &&
+        entry.hasOwnProperty(key.replace(`_${locale}`, ''))
+      ) {
+        // ignore => we only examine the default props
+      } else if (key.endsWith(`_${locale}`)) {
+        // no default prop, copy over
+        value[key] = entry[key]
+      } else if (Array.isArray(entry[key])) {
+        if (entry.hasOwnProperty(`${key}_${locale}`)) {
+          value[key] = entry[`${key}_${locale}`].map(arrayEntry =>
+            this.extractLanguageValues(arrayEntry, locale)
+          )
+        } else {
+          value[key] = entry[key].map(arrayEntry =>
+            this.extractLanguageValues(arrayEntry, locale)
+          )
+        }
+      } else if (typeof entry[key] === 'object') {
+        if (entry.hasOwnProperty(`${key}_${locale}`)) {
+          value[key] = this.extractLanguageValues(
+            entry[`${key}_${locale}`],
+            locale
+          )
+        } else {
+          value[key] = this.extractLanguageValues(entry[key], locale)
+        }
+      } else if (entry.hasOwnProperty(`${key}_${locale}`)) {
+        value[key] = entry[`${key}_${locale}`]
+      } else {
+        value[key] = entry[key]
+      }
+    })
+    return value
   }
 
   async getCollections() {
@@ -109,7 +160,7 @@ module.exports = class CockpitService {
     )
 
     const items = entries.map(entry =>
-      createCollectionItem(name, regionFields, entry)
+      createCollectionItem(name, regionFields, entry, this.defaultLocale)
     )
 
     for (let index = 0; index < this.locales.length; index++) {
@@ -121,7 +172,12 @@ module.exports = class CockpitService {
 
       items.push(
         ...entries.map(entry =>
-          createCollectionItem(name, regionFields, entry, this.locales[index])
+          createCollectionItem(
+            name,
+            regionFields,
+            this.extractLanguageValues(entry, this.locales[index]),
+            this.locales[index]
+          )
         )
       )
     }
@@ -145,7 +201,7 @@ module.exports = class CockpitService {
     )
 
     const items = entries.map(entry =>
-      createCollectionItem(name, pageFields, entry)
+      createCollectionItem(name, pageFields, entry, this.defaultLocale)
     )
 
     for (let index = 0; index < this.locales.length; index++) {
@@ -157,7 +213,12 @@ module.exports = class CockpitService {
 
       items.push(
         ...entries.map(entry =>
-          createCollectionItem(name, pageFields, entry, this.locales[index])
+          createCollectionItem(
+            name,
+            pageFields,
+            this.extractLanguageValues(entry, this.locales[index]),
+            this.locales[index]
+          )
         )
       )
     }

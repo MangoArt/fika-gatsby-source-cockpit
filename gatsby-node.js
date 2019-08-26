@@ -21,6 +21,7 @@ exports.sourceNodes = async ({ actions, cache, store }, configOptions) => {
     configOptions.baseUrl,
     configOptions.token,
     configOptions.locales,
+    configOptions.defaultLocale,
     configOptions.collections
   )
   const fileNodeFactory = new FileNodeFactory(createNode, store, cache)
