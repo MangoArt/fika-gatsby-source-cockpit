@@ -2,6 +2,7 @@ const mime = require('mime')
 const request = require('request-promise')
 const getFieldsOfTypes = require('./helpers.js').getFieldsOfTypes
 const slugify = require('slugify')
+const merge = require('lodash').merge
 
 const {
   METHODS,
@@ -90,7 +91,20 @@ module.exports = class CockpitService {
     return { items, name }
   }
 
-  extractLanguageValues(entry, locale) {
+  mergeObjects(obj1, obj2, locale) {
+    return merge({}, obj1, obj2)
+  }
+
+  writeFile(name, content) {
+    fs.writeFile(`./${name}.json`, content, function(err) {
+      if (err) {
+        return console.log(err)
+      }
+      console.log('The file was saved!')
+    })
+  }
+
+  extractLanguageValues(entry, locale, debug) {
     if (entry === null) {
       return null
     }
@@ -106,9 +120,23 @@ module.exports = class CockpitService {
         value[key] = entry[key]
       } else if (Array.isArray(entry[key])) {
         if (entry.hasOwnProperty(`${key}_${locale}`)) {
-          value[key] = entry[`${key}_${locale}`].map(arrayEntry =>
-            this.extractLanguageValues(arrayEntry, locale)
-          )
+          // TODO: Add check for object
+          if (entry[key].length === entry[`${key}_${locale}`].length) {
+            value[key] = entry[key].map((arrayEntry, index) => {
+              return this.extractLanguageValues(
+                this.mergeObjects(
+                  arrayEntry,
+                  entry[`${key}_${locale}`][index],
+                  locale
+                ),
+                locale
+              )
+            })
+          } else {
+            value[key] = entry[`${key}_${locale}`].map(arrayEntry =>
+              this.extractLanguageValues(arrayEntry, locale)
+            )
+          }
         } else {
           value[key] = entry[key].map(arrayEntry =>
             this.extractLanguageValues(arrayEntry, locale)
@@ -116,10 +144,12 @@ module.exports = class CockpitService {
         }
       } else if (typeof entry[key] === 'object') {
         if (entry.hasOwnProperty(`${key}_${locale}`)) {
-          value[key] = this.extractLanguageValues(
+          const mergedObjects = this.mergeObjects(
+            entry[key],
             entry[`${key}_${locale}`],
             locale
           )
+          value[key] = this.extractLanguageValues(mergedObjects, locale)
         } else {
           value[key] = this.extractLanguageValues(entry[key], locale)
         }
