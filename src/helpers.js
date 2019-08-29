@@ -16,11 +16,13 @@ function getFieldsOfTypes(item, types) {
   Object.keys(item)
     .filter(fieldName => item[fieldName] && item[fieldName].type === 'repeater')
     .forEach(fieldName => {
-      item[fieldName].value.forEach(repeaterEntry => {
-        fieldsOfTypes.push(
-          ...getFieldsOfTypes({ repeater: repeaterEntry }, types)
-        )
-      })
+      if (Array.isArray(item[fieldName].value)) {
+        item[fieldName].value.forEach(repeaterEntry => {
+          fieldsOfTypes.push(
+            ...getFieldsOfTypes({ repeater: repeaterEntry }, types)
+          )
+        })
+      }
     })
 
   return fieldsOfTypes

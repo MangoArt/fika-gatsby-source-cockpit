@@ -121,21 +121,26 @@ module.exports = class CockpitService {
       } else if (Array.isArray(entry[key])) {
         if (entry.hasOwnProperty(`${key}_${locale}`)) {
           // TODO: Add check for object
-          if (entry[key].length === entry[`${key}_${locale}`].length) {
-            value[key] = entry[key].map((arrayEntry, index) => {
-              return this.extractLanguageValues(
-                this.mergeObjects(
-                  arrayEntry,
-                  entry[`${key}_${locale}`][index],
+          try {
+            if (entry[key].length === entry[`${key}_${locale}`].length) {
+              value[key] = entry[key].map((arrayEntry, index) => {
+                return this.extractLanguageValues(
+                  this.mergeObjects(
+                    arrayEntry,
+                    entry[`${key}_${locale}`][index],
+                    locale
+                  ),
                   locale
-                ),
-                locale
+                )
+              })
+            } else {
+              value[key] = entry[`${key}_${locale}`].map(arrayEntry =>
+                this.extractLanguageValues(arrayEntry, locale)
               )
-            })
-          } else {
-            value[key] = entry[`${key}_${locale}`].map(arrayEntry =>
-              this.extractLanguageValues(arrayEntry, locale)
-            )
+            }
+          } catch (e) {
+            // TODO: FIX THIS
+            console.log(e)
           }
         } else {
           value[key] = entry[key].map(arrayEntry =>
@@ -507,53 +512,65 @@ const createCollectionField = (
     ) {
       itemField.value = []
     } else if (typeof repeaterFieldOptions.field !== 'undefined') {
-      itemField.value = collectionFieldValue.map(repeaterEntry =>
-        createCollectionField(
-          collectionName,
-          repeaterEntry.value,
-          repeaterFieldOptions.field
-        )
-      )
-    } else if (typeof repeaterFieldOptions.fields !== 'undefined') {
-      if (collectionFieldValue) {
+      try {
         itemField.value = collectionFieldValue.map(repeaterEntry =>
-          repeaterFieldOptions.fields.reduce(
-            (accumulator, currentFieldConfiguration) => {
-              if (
-                typeof currentFieldConfiguration.name === 'undefined' &&
-                currentFieldConfiguration.label === repeaterEntry.field.label
-              ) {
-                const generatedNameProperty = slugify(
-                  currentFieldConfiguration.label,
-                  { lower: true }
-                )
-                console.warn(
-                  `\nRepeater field without 'name' attribute used in collection '${collectionName}'. ` +
-                    `Using value '${generatedNameProperty}' for name (generated from the label).`
-                )
-                currentFieldConfiguration.name = generatedNameProperty
-                repeaterEntry.field.name = generatedNameProperty
-              }
-
-              if (currentFieldConfiguration.name === repeaterEntry.field.name) {
-                accumulator.valueType = currentFieldConfiguration.name
-                accumulator.value[
-                  currentFieldConfiguration.name
-                ] = createCollectionField(
-                  collectionName,
-                  repeaterEntry.value,
-                  currentFieldConfiguration
-                )
-              }
-
-              return accumulator
-            },
-            {
-              type: 'set',
-              value: {},
-            }
+          createCollectionField(
+            collectionName,
+            repeaterEntry.value,
+            repeaterFieldOptions.field
           )
         )
+      } catch (e) {
+        // TODO: FIX THIS
+        console.log(e)
+      }
+    } else if (typeof repeaterFieldOptions.fields !== 'undefined') {
+      if (collectionFieldValue) {
+        try {
+          itemField.value = collectionFieldValue.map(repeaterEntry =>
+            repeaterFieldOptions.fields.reduce(
+              (accumulator, currentFieldConfiguration) => {
+                if (
+                  typeof currentFieldConfiguration.name === 'undefined' &&
+                  currentFieldConfiguration.label === repeaterEntry.field.label
+                ) {
+                  const generatedNameProperty = slugify(
+                    currentFieldConfiguration.label,
+                    { lower: true }
+                  )
+                  console.warn(
+                    `\nRepeater field without 'name' attribute used in collection '${collectionName}'. ` +
+                      `Using value '${generatedNameProperty}' for name (generated from the label).`
+                  )
+                  currentFieldConfiguration.name = generatedNameProperty
+                  repeaterEntry.field.name = generatedNameProperty
+                }
+
+                if (
+                  currentFieldConfiguration.name === repeaterEntry.field.name
+                ) {
+                  accumulator.valueType = currentFieldConfiguration.name
+                  accumulator.value[
+                    currentFieldConfiguration.name
+                  ] = createCollectionField(
+                    collectionName,
+                    repeaterEntry.value,
+                    currentFieldConfiguration
+                  )
+                }
+
+                return accumulator
+              },
+              {
+                type: 'set',
+                value: {},
+              }
+            )
+          )
+        } catch (e) {
+          // TODO: FIX THIS
+          console.log(e)
+        }
       } else {
         itemField.value = []
       }
